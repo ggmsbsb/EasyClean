@@ -6,7 +6,7 @@ Aqui você encontrará scripts práticos e prontos para uso em diversas situaç�
 
 ### Funcionalidades Atuais
 
-Dataset Cleaner
+Dataset Cleaner (pasta cleandataset)
 
 - Interface gráfica com Tkinter.
 
