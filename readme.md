@@ -1,8 +1,6 @@
 ### Projetos
 
-Bem-vindo ao repositório de pequenos códigos pensados para facilitar tarefas cotidianas e poupar seu tempo!
-
-Aqui você encontrará scripts práticos e prontos para uso em diversas situações. Desde automações simples até ferramentas para tratamento de dados, o objetivo é ser um verdadeiro kit de soluções rápidas para o seu dia a dia.
+Aqui você encontrará um script prático e pronto para uso na limpeza e tratamento de dados. O objetivo do EZClean é ser uma solução rápida e eficiente para o seu dia a dia, facilitando o processo de limpeza de datasets.
 
 ### Funcionalidades Atuais
 
@@ -18,4 +16,4 @@ Dataset Cleaner (pasta cleandataset)
 
 ### Contribuições
 
-Sinta-se à vontade para sugerir melhorias ou adicionar novos scripts que possam ser úteis no dia a dia. Toda contribuição é bem-vinda!
+Sinta-se à vontade para sugerir melhorias ou adicionar novas features.

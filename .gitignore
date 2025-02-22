@@ -1,0 +1,33 @@
+# Ignorar ambientes virtuais
+.venv/
+venv/
+
+# Ignorar cache do Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignorar arquivos de log
+*.log
+
+# Ignorar configurações do VSCode
+.vscode/
+
+# Ignorar arquivos temporários
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+
+# Ignorar arquivos de dados gerados
+*.csv
+*.xlsx
+
+# Ignorar arquivos de sistema
+.DS_Store
+Thumbs.db
+
+
+# GERADOR POR IA
