@@ -25,10 +25,18 @@ def clean_dataframe(df, columns_to_remove=None):
     df.drop_duplicates(inplace=True)
     
     # Tratar valores ausentes
-    for col in df.select_dtypes(include=['float64']).columns:
-        df[col] = df[col].fillna(0)
-    for col in df.select_dtypes(include=['object']).columns:
-        df[col] = df[col].fillna('')
+    total_entries = len(df)
+    for col in df.columns:
+        missing_count = df[col].isna().sum()
+        missing_percentage = (missing_count / total_entries) * 100
+        
+        if missing_percentage < 5:
+            df.drop(columns=[col], inplace=True)
+        else:
+            if df[col].dtype == 'float64' or df[col].dtype == 'int64':
+                df[col].fillna(df[col].mean(), inplace=True)
+            elif df[col].dtype == 'object':
+                df[col].fillna(df[col].mode()[0], inplace=True)
     
     # Remover caracteres especiais das colunas do tipo 'object'
     for col in df.select_dtypes(include=['object']).columns:

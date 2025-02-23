@@ -8,7 +8,7 @@ from clean import arquivos_diretorio, remove_diacritico, clean_dataframe, get_co
 class DatasetCleanerApp:
     def __init__(self, root):
         self.root = root
-        self.root.title("Dataset Cleaner")
+        self.root.title("EZClean")
 
         self.label = tk.Label(root, text="Selecione o diretório do dataset:")
         self.label.pack(pady=10)
