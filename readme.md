@@ -1,6 +1,6 @@
 ### Projetos
 
-Aqui você encontrará um script prático e pronto para uso na limpeza e tratamento de dados. O objetivo do EZClean é ser uma solução rápida e eficiente para o seu dia a dia, facilitando o processo de limpeza de datasets.
+Aqui você encontrará um script prático e pronto para uso na limpeza e tratamento de dados. O objetivo do EasyClean é ser uma solução rápida e eficiente para o seu dia a dia, facilitando o processo de limpeza de datasets.
 
 ### Funcionalidades Atuais
 
