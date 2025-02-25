@@ -14,7 +14,15 @@ def remove_diacritico(text):
     nfkd_form = unicodedata.normalize('NFKD', text)
     return ''.join([c for c in nfkd_form if not unicodedata.combining(c)])
 
-def clean_dataframe(df, columns_to_remove=None):
+def convert_date_columns(df, date_format):
+    for col in df.columns:
+        try:
+            df[col] = pd.to_datetime(df[col], errors='raise').dt.strftime(date_format)
+        except (ValueError, TypeError):
+            continue
+    return df
+
+def clean_dataframe(df, columns_to_remove=None, date_format=None):
     # Remover diacríticos dos nomes das colunas
     df.columns = [remove_diacritico(col) for col in df.columns]
     
@@ -34,9 +42,9 @@ def clean_dataframe(df, columns_to_remove=None):
             df.drop(columns=[col], inplace=True)
         else:
             if df[col].dtype == 'float64' or df[col].dtype == 'int64':
-                df[col].fillna(df[col].mean(), inplace=True)
+                df[col] = df[col].fillna(df[col].mean())
             elif df[col].dtype == 'object':
-                df[col].fillna(df[col].mode()[0], inplace=True)
+                df[col] = df[col].fillna(df[col].mode()[0])
     
     # Remover caracteres especiais das colunas do tipo 'object'
     for col in df.select_dtypes(include=['object']).columns:
@@ -47,6 +55,10 @@ def clean_dataframe(df, columns_to_remove=None):
     if columns_to_remove:
         columns_to_remove = [col for col in columns_to_remove if col in df.columns]
         df.drop(columns=columns_to_remove, inplace=True)
+    
+    # Converter colunas de data
+    if date_format:
+        df = convert_date_columns(df, date_format)
     
     return df
 

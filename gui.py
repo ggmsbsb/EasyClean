@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import filedialog, messagebox, Toplevel, Listbox, MULTIPLE, Button, LabelFrame
+from tkinter import filedialog, messagebox, Toplevel, Listbox, MULTIPLE, Button, LabelFrame, Entry, Radiobutton, StringVar
 import os
 import pandas as pd
 import unicodedata
@@ -24,6 +24,7 @@ class DatasetCleanerApp:
 
         self.directory_path = ""
         self.columns_to_remove = {}
+        self.date_format = None
 
     def browse_directory(self):
         self.directory_path = filedialog.askdirectory()
@@ -34,6 +35,7 @@ class DatasetCleanerApp:
         top.title("Selecione as colunas para remover")
 
         listboxes = {}  # Armazena as referências das Listboxes
+        date_columns = set()
 
         for filename, df in dataframes.items():
             columns = get_columns(df)
@@ -43,6 +45,8 @@ class DatasetCleanerApp:
             listbox = Listbox(frame, selectmode=MULTIPLE, exportselection=False)  # Desabilita exportação da seleção
             for col in columns:
                 listbox.insert(tk.END, col)
+                if pd.api.types.is_datetime64_any_dtype(df[col]):
+                    date_columns.add(col)
             listbox.pack(pady=10)
 
             listboxes[filename] = listbox  # Armazena a Listbox no dicionário
@@ -54,11 +58,30 @@ class DatasetCleanerApp:
                 self.columns_to_remove[filename] = [listbox.get(i) for i in selected_indices]
             
             top.destroy()
-            self.execute_cleaning(dataframes)
+            if date_columns:
+                self.select_date_format(dataframes)
+            else:
+                self.execute_cleaning(dataframes)
 
         confirm_button = Button(top, text="Confirmar", command=on_confirm)
         confirm_button.pack(pady=10)
 
+    def select_date_format(self, dataframes):
+        top = Toplevel(self.root)
+        top.title("Selecione o formato de data")
+
+        date_formats = ["%d/%m/%Y", "%m/%d/%Y", "%Y-%m-%d"]
+        self.date_format = StringVar(value=date_formats[0])
+
+        for fmt in date_formats:
+            Radiobutton(top, text=fmt, variable=self.date_format, value=fmt).pack(anchor=tk.W)
+
+        def on_confirm():
+            top.destroy()
+            self.execute_cleaning(dataframes)
+
+        confirm_button = Button(top, text="Confirmar", command=on_confirm)
+        confirm_button.pack(pady=10)
 
     def clean_datasets(self):
         if not self.directory_path:
@@ -87,9 +110,10 @@ class DatasetCleanerApp:
             self.select_columns(dataframes)
 
     def execute_cleaning(self, dataframes):
+        date_format = self.date_format.get() if self.date_format else None
         for filename, df in dataframes.items():
             columns_to_remove = self.columns_to_remove.get(filename, [])
-            df = clean_dataframe(df, columns_to_remove)
+            df = clean_dataframe(df, columns_to_remove, date_format)
             if filename.endswith('.csv'):
                 df.to_csv(os.path.join(self.directory_path, filename), index=False, encoding='utf-8', sep=';')
             elif filename.endswith('.xlsx'):
