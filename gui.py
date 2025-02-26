@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import filedialog, messagebox, Toplevel, Listbox, MULTIPLE, Button, LabelFrame, Entry, Radiobutton, StringVar
+from tkinter import filedialog, messagebox, Toplevel, Listbox, MULTIPLE, Button, LabelFrame, Entry, Radiobutton, StringVar, Label
 import os
 import pandas as pd
 import unicodedata
@@ -30,12 +30,29 @@ class DatasetCleanerApp:
         self.directory_path = filedialog.askdirectory()
         self.path_label.config(text=self.directory_path)
 
+    def detectar_formato_data(self, df):
+        formatos = {"%d/%m/%Y": 0, "%m/%d/%Y": 0, "%Y-%m-%d": 0}
+        
+        for col in df.select_dtypes(include=['object']):
+            amostras = df[col].dropna().sample(min(10, len(df[col]))).tolist()
+            for sample in amostras:
+                for fmt in formatos.keys():
+                    try:
+                        pd.to_datetime(sample, format=fmt, errors='raise')
+                        formatos[fmt] += 1
+                    except ValueError:
+                        pass
+        
+        formato_detectado = max(formatos, key=formatos.get)
+        return formato_detectado if formatos[formato_detectado] > 0 else None
+
     def select_columns(self, dataframes):
         top = Toplevel(self.root)
         top.title("Selecione as colunas para remover")
 
         listboxes = {}  # Armazena as referências das Listboxes
-        date_columns = set()
+        self.date_columns = set()
+        self.detected_date_format = None
 
         for filename, df in dataframes.items():
             columns = get_columns(df)
@@ -45,8 +62,8 @@ class DatasetCleanerApp:
             listbox = Listbox(frame, selectmode=MULTIPLE, exportselection=False)  # Desabilita exportação da seleção
             for col in columns:
                 listbox.insert(tk.END, col)
-                if pd.api.types.is_datetime64_any_dtype(df[col]):
-                    date_columns.add(col)
+                if pd.api.types.is_datetime64_any_dtype(df[col]) or df[col].astype(str).str.match(r'\d{2}/\d{2}/\d{4}|\d{4}-\d{2}-\d{2}').any():
+                    self.date_columns.add(col)
             listbox.pack(pady=10)
 
             listboxes[filename] = listbox  # Armazena a Listbox no dicionário
@@ -58,7 +75,7 @@ class DatasetCleanerApp:
                 self.columns_to_remove[filename] = [listbox.get(i) for i in selected_indices]
             
             top.destroy()
-            if date_columns:
+            if self.date_columns:
                 self.select_date_format(dataframes)
             else:
                 self.execute_cleaning(dataframes)
@@ -70,10 +87,15 @@ class DatasetCleanerApp:
         top = Toplevel(self.root)
         top.title("Selecione o formato de data")
 
-        date_formats = ["%d/%m/%Y", "%m/%d/%Y", "%Y-%m-%d"]
-        self.date_format = StringVar(value=date_formats[0])
+        sample_df = next(iter(dataframes.values()))
+        self.detected_date_format = self.detectar_formato_data(sample_df) or "%d/%m/%Y"
+        formatos_disponiveis = {"%d/%m/%Y", "%m/%d/%Y", "%Y-%m-%d"} - {self.detected_date_format}
+        
+        self.date_format = StringVar(value=list(formatos_disponiveis)[0])
 
-        for fmt in date_formats:
+        Label(top, text=f"Formato detectado: {self.detected_date_format}").pack(pady=5)
+
+        for fmt in formatos_disponiveis:
             Radiobutton(top, text=fmt, variable=self.date_format, value=fmt).pack(anchor=tk.W)
 
         def on_confirm():
