@@ -33,18 +33,23 @@ def clean_dataframe(df, columns_to_remove=None, date_format=None):
     df.drop_duplicates(inplace=True)
     
     # Tratar valores ausentes
+    # Tratar valores ausentes
     total_entries = len(df)
     for col in df.columns:
         missing_count = df[col].isna().sum()
         missing_percentage = (missing_count / total_entries) * 100
         
-        if missing_percentage < 5:
-            df.drop(columns=[col], inplace=True)
-        else:
+        if missing_percentage > 5:
+            # Para colunas com mais de 5% de dados ausentes, aplica a média ou moda
             if df[col].dtype == 'float64' or df[col].dtype == 'int64':
-                df[col] = df[col].fillna(df[col].mean())
+                df[col] = df[col].fillna(df[col].mean())  # Média para colunas numéricas
             elif df[col].dtype == 'object':
-                df[col] = df[col].fillna(df[col].mode()[0])
+                df[col] = df[col].fillna(df[col].mode()[0])  # Moda para colunas de texto
+        else:
+            # Remover linhas com menos de 5% de dados preenchidos
+            df = df.dropna(subset=[col], thresh=int(0.95 * total_entries))  # Remover linhas com menos de 95% de dados preenchidos
+
+
     
     # Remover caracteres especiais das colunas do tipo 'object'
     for col in df.select_dtypes(include=['object']).columns:
