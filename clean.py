@@ -23,7 +23,7 @@ def convert_date_columns(df, date_format):
     return df
 
 def clean_dataframe(df, columns_to_remove=None, date_format=None):
-    # Remover diacríticos dos nomes das colunas
+    # Remover diacríticos
     df.columns = [remove_diacritico(col) for col in df.columns]
     
     # Remover espaços em branco extras e converter para minúsculas
@@ -33,30 +33,25 @@ def clean_dataframe(df, columns_to_remove=None, date_format=None):
     df.drop_duplicates(inplace=True)
     
     # Tratar valores ausentes
-    # Tratar valores ausentes
     total_entries = len(df)
     for col in df.columns:
         missing_count = df[col].isna().sum()
         missing_percentage = (missing_count / total_entries) * 100
         
         if missing_percentage > 5:
-            # Para colunas com mais de 5% de dados ausentes, aplica a média ou moda
             if df[col].dtype == 'float64' or df[col].dtype == 'int64':
-                df[col] = df[col].fillna(df[col].mean())  # Média para colunas numéricas
+                df[col] = df[col].fillna(df[col].mean())  # Média 
             elif df[col].dtype == 'object':
-                df[col] = df[col].fillna(df[col].mode()[0])  # Moda para colunas de texto
+                df[col] = df[col].fillna(df[col].mode()[0])  # Moda
         else:
             # Remover linhas com menos de 5% de dados preenchidos
-            df = df.dropna(subset=[col], thresh=int(0.95 * total_entries))  # Remover linhas com menos de 95% de dados preenchidos
+            df = df.dropna(subset=[col], thresh=int(0.95 * total_entries)) 
 
-
-    
-    # Remover caracteres especiais das colunas do tipo 'object'
+    # Remover acentos e caracteres especiais
     for col in df.select_dtypes(include=['object']).columns:
         df[col] = df[col].apply(lambda x: remove_diacritico(x) if isinstance(x, str) else x)
         df[col] = df[col].str.replace(r'[^\w\s]', '', regex=True).str.strip().str.lower()
     
-    # Remover colunas selecionadas que possam ser irrelevantes.
     if columns_to_remove:
         columns_to_remove = [col for col in columns_to_remove if col in df.columns]
         df.drop(columns=columns_to_remove, inplace=True)
