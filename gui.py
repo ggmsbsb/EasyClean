@@ -2,7 +2,6 @@ import tkinter as tk
 from tkinter import filedialog, messagebox, Toplevel, Listbox, MULTIPLE, Button, LabelFrame, Entry, Radiobutton, StringVar, Label
 import os
 import pandas as pd
-import unicodedata
 from clean import arquivos_diretorio, remove_diacritico, clean_dataframe, get_columns
 
 class DatasetCleanerApp:

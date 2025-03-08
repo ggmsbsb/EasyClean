@@ -14,6 +14,7 @@ def remove_diacritico(text):
     nfkd_form = unicodedata.normalize('NFKD', text)
     return ''.join([c for c in nfkd_form if not unicodedata.combining(c)])
 
+# Função para converter colunas de data em padrões conhecidos
 def convert_date_columns(df, date_format):
     for col in df.columns:
         try:
@@ -26,7 +27,7 @@ def clean_dataframe(df, columns_to_remove=None, date_format=None):
     # Remover diacríticos
     df.columns = [remove_diacritico(col) for col in df.columns]
     
-    # Remover espaços em branco extras e converter para minúsculas
+    # Remover espaços em branco e converter para minúsculas
     df.columns = [col.strip().lower() for col in df.columns]
     
     # Remover duplicatas
