@@ -1,19 +1,23 @@
 ### Projetos
 
-Aqui você encontrará um script prático e pronto para uso na limpeza e tratamento de dados. O objetivo do EasyClean é ser uma solução rápida e eficiente para o seu dia a dia, facilitando o processo de limpeza de datasets.
+O objetivo do EasyClean é ser uma solução rápida e eficiente para o seu dia a dia, facilitando o processo de limpeza de datasets.
 
 ### Funcionalidades Atuais
 
-Dataset Cleaner (pasta cleandataset)
+- Interface gráfica com Tkinter, tornando a ferramenta fácil de usar.
 
-- Interface gráfica com Tkinter.
+- Limpeza automatizada de datasets (CSV e XLSX), economizando tempo em etapas repetitivas.
 
-- Limpeza automatizada de datasets (CSV e XLSX).
+- Remoção de colunas selecionadas: O usuário pode facilmente escolher e remover colunas irrelevantes.
 
-- Remoção de colunas selecionadas.
+- Tratamento de valores ausentes: Preenche automaticamente com média para colunas numéricas e moda para colunas de texto.
 
-- Tratamento de valores nulos, duplicatas e caracteres especiais.
+- Eliminação de duplicatas: Remove entradas duplicadas para garantir dados limpos e confiáveis.
+
+- Remoção de caracteres especiais e diacríticos: Como ~, ^, etc., para garantir que os dados fiquem consistentes.
+
+- Detecção e padronização do formato de data: O formato das colunas de data é detectado e o usuário pode optar por alterar para outro formato.
 
 ### Contribuições
 
-Sinta-se à vontade para sugerir melhorias ou adicionar novas features.
+Sinta-se à vontade para sugerir melhorias, relatar problemas ou adicionar novas funcionalidades. 
