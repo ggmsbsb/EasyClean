@@ -16,8 +16,6 @@ O objetivo do EasyClean é ser uma solução rápida e eficiente para o seu dia 
 
 - Remoção de caracteres especiais e diacríticos: Como ~, ^, etc., para garantir que os dados fiquem consistentes.
 
-- Detecção e padronização do formato de data: O formato das colunas de data é detectado e o usuário pode optar por alterar para outro formato.
-
 ### Contribuições
 
-Sinta-se à vontade para sugerir melhorias, relatar problemas ou adicionar novas funcionalidades. 
+Sinta-se à vontade para sugerir melhorias, relatar problemas ou adicionar novas funcionalidades.

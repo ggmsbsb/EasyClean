@@ -1,8 +1,8 @@
 import tkinter as tk
-from tkinter import filedialog, messagebox, Toplevel, Listbox, MULTIPLE, Button, LabelFrame, Entry, Radiobutton, StringVar, Label
+from tkinter import filedialog, messagebox, Toplevel, Listbox, MULTIPLE, Button, LabelFrame
 import os
 import pandas as pd
-from clean import arquivos_diretorio, remove_diacritico, clean_dataframe, get_columns
+from clean import arquivos_diretorio, clean_dataframe, get_columns
 
 class DatasetCleanerApp:
     def __init__(self, root):
@@ -23,35 +23,16 @@ class DatasetCleanerApp:
 
         self.directory_path = ""
         self.columns_to_remove = {}
-        self.date_format = None
 
     def browse_directory(self):
         self.directory_path = filedialog.askdirectory()
         self.path_label.config(text=self.directory_path)
-
-    def detectar_formato_data(self, df):
-        formatos = {"%d/%m/%Y": 0, "%m/%d/%Y": 0, "%Y-%m-%d": 0}
-        
-        for col in df.select_dtypes(include=['object']):
-            amostras = df[col].dropna().sample(min(10, len(df[col]))).tolist()
-            for sample in amostras:
-                for fmt in formatos.keys():
-                    try:
-                        pd.to_datetime(sample, format=fmt, errors='raise')
-                        formatos[fmt] += 1
-                    except ValueError:
-                        pass
-        
-        formato_detectado = max(formatos, key=formatos.get)
-        return formato_detectado if formatos[formato_detectado] > 0 else None
 
     def select_columns(self, dataframes):
         top = Toplevel(self.root)
         top.title("Selecione as colunas para remover")
 
         listboxes = {}  # Armazena as referências das Listboxes
-        self.date_columns = set()
-        self.detected_date_format = None
 
         for filename, df in dataframes.items():
             columns = get_columns(df)
@@ -61,8 +42,6 @@ class DatasetCleanerApp:
             listbox = Listbox(frame, selectmode=MULTIPLE, exportselection=False)  # Desabilita exportação da seleção
             for col in columns:
                 listbox.insert(tk.END, col)
-                if pd.api.types.is_datetime64_any_dtype(df[col]) or df[col].astype(str).str.match(r'\d{2}/\d{2}/\d{4}|\d{4}-\d{2}-\d{2}').any():
-                    self.date_columns.add(col)
             listbox.pack(pady=10)
 
             listboxes[filename] = listbox  # Armazena a Listbox no dicionário
@@ -73,31 +52,6 @@ class DatasetCleanerApp:
                 selected_indices = listbox.curselection()
                 self.columns_to_remove[filename] = [listbox.get(i) for i in selected_indices]
             
-            top.destroy()
-            if self.date_columns:
-                self.select_date_format(dataframes)
-            else:
-                self.execute_cleaning(dataframes)
-
-        confirm_button = Button(top, text="Confirmar", command=on_confirm)
-        confirm_button.pack(pady=10)
-
-    def select_date_format(self, dataframes):
-        top = Toplevel(self.root)
-        top.title("Selecione o formato de data")
-
-        sample_df = next(iter(dataframes.values()))
-        self.detected_date_format = self.detectar_formato_data(sample_df) or "%d/%m/%Y"
-        formatos_disponiveis = {"%d/%m/%Y", "%m/%d/%Y", "%Y-%m-%d"} - {self.detected_date_format}
-        
-        self.date_format = StringVar(value=list(formatos_disponiveis)[0])
-
-        Label(top, text=f"Formato detectado: {self.detected_date_format}").pack(pady=5)
-
-        for fmt in formatos_disponiveis:
-            Radiobutton(top, text=fmt, variable=self.date_format, value=fmt).pack(anchor=tk.W)
-
-        def on_confirm():
             top.destroy()
             self.execute_cleaning(dataframes)
 
@@ -131,10 +85,9 @@ class DatasetCleanerApp:
             self.select_columns(dataframes)
 
     def execute_cleaning(self, dataframes):
-        date_format = self.date_format.get() if self.date_format else None
         for filename, df in dataframes.items():
             columns_to_remove = self.columns_to_remove.get(filename, [])
-            df = clean_dataframe(df, columns_to_remove, date_format)
+            df = clean_dataframe(df, columns_to_remove)
             if filename.endswith('.csv'):
                 df.to_csv(os.path.join(self.directory_path, filename), index=False, encoding='utf-8', sep=';')
             elif filename.endswith('.xlsx'):
