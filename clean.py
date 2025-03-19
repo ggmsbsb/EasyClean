@@ -14,7 +14,7 @@ def remove_diacritico(text):
     nfkd_form = unicodedata.normalize('NFKD', text)
     return ''.join([c for c in nfkd_form if not unicodedata.combining(c)])
 
-def clean_dataframe(df, columns_to_remove=None):
+def clean_dataframe(df, columns_to_remove=None, skip_missing_values=False):
     # Remover diacríticos dos nomes das colunas
     df.columns = [remove_diacritico(col) for col in df.columns]
     
@@ -24,14 +24,15 @@ def clean_dataframe(df, columns_to_remove=None):
     # Remover duplicatas
     df.drop_duplicates(inplace=True)
     
-    # Tratar valores ausentes
-    for col in df.columns:
-        if df[col].dtype == 'float64' or df[col].dtype == 'int64':
-            mean_value = df[col].mean()
-            df[col] = df[col].apply(lambda x: mean_value if pd.isna(x) else x)
-        elif df[col].dtype == 'object':
-            mode_value = df[col].mode()[0]
-            df[col] = df[col].apply(lambda x: mode_value if pd.isna(x) else x)
+    # Tratar valores ausentes (se não for para pular)
+    if not skip_missing_values:
+        for col in df.columns:
+            if df[col].dtype == 'float64' or df[col].dtype == 'int64':
+                mean_value = df[col].mean()
+                df[col] = df[col].apply(lambda x: mean_value if pd.isna(x) else x)
+            elif df[col].dtype == 'object':
+                mode_value = df[col].mode()[0]
+                df[col] = df[col].apply(lambda x: mode_value if pd.isna(x) else x)
     
     # Remover acentos e caracteres especiais
     for col in df.select_dtypes(include=['object']).columns:

@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import filedialog, messagebox, Toplevel, Listbox, MULTIPLE, Button, LabelFrame
+from tkinter import filedialog, messagebox, Toplevel, Listbox, MULTIPLE, Button, LabelFrame, Checkbutton, BooleanVar
 import os
 import pandas as pd
 from clean import arquivos_diretorio, clean_dataframe, get_columns
@@ -17,6 +17,13 @@ class DatasetCleanerApp:
 
         self.browse_button = tk.Button(root, text="Selecionar Diretório", command=self.browse_directory)
         self.browse_button.pack(pady=10)
+
+        # Checkbox para pular o tratamento de valores ausentes
+        self.skip_missing_values = BooleanVar(value=False)
+        self.skip_missing_checkbox = Checkbutton(
+            root, text="Pular tratamento de valores ausentes", variable=self.skip_missing_values
+        )
+        self.skip_missing_checkbox.pack(pady=5)
 
         self.clean_button = tk.Button(root, text="Limpar Datasets", command=self.clean_datasets)
         self.clean_button.pack(pady=10)
@@ -85,9 +92,10 @@ class DatasetCleanerApp:
             self.select_columns(dataframes)
 
     def execute_cleaning(self, dataframes):
+        skip_missing = self.skip_missing_values.get()  # Obtém o valor do checkbox
         for filename, df in dataframes.items():
             columns_to_remove = self.columns_to_remove.get(filename, [])
-            df = clean_dataframe(df, columns_to_remove)
+            df = clean_dataframe(df, columns_to_remove, skip_missing_values=skip_missing)
             if filename.endswith('.csv'):
                 df.to_csv(os.path.join(self.directory_path, filename), index=False, encoding='utf-8', sep=';')
             elif filename.endswith('.xlsx'):
